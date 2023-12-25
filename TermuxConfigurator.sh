@@ -10,7 +10,7 @@ PACKAGES="git vim python python2 nodejs curl wget zsh neofetch htop mc openssh f
 
 update_script() {
     echo -e "\e[1mПроверка обновлений...\e[0m"
-    git pull origin master 
+    git pull origin "$(git rev-parse --abbrev-ref HEAD)" 
     if [ $? -eq 0 ]; then
         echo -e "\e[1mСкрипт успешно обновлен до последней версии.\e[0m"
     else
