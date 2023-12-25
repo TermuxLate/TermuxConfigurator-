@@ -1,11 +1,55 @@
 #!/bin/bash
 
-SCRIPT_VERSION="1.0"
-
+SCRIPT_VERSION="1.1"
 DEVELOPER="Termux_Laif"
 
+CONFIG_DIR="$HOME/.termux_config"
 
-PACKAGES="git vim python python2 nodejs curl wget zsh neofetch htop mc openssh fish tmux ruby golang"
+PACKAGES="git vim python python2 nodejs curl wget zsh neofetch htop mc openssh fish tmux ruby golang aircrack-ng"
+
+install_configure_figlet() {
+    echo -e "\e[1mУстановка и настройка figlet...\e[0m"
+    pkg install -y figlet
+    echo -e "\e[1mУстановка figlet завершена.\e[0m"
+}
+
+configure_figlet() {
+    read -p "Хотите настроить figlet? (yes/no): " configure_figlet
+    if [ "$configure_figlet" == "yes" ]; then
+        read -p "Введите стиль для figlet (например, 'block'): " figlet_style
+        echo "export FIGLET_FONT=$figlet_style" >> ~/.bashrc
+        echo -e "\e[1mНастройка figlet завершена.\e[0m"
+    fi
+}
+
+
+configure_command_history() {
+    echo -e "\e[1mНастройка сохранения истории команд в Termux...\e[0m"
+    termux-setup-storage # Убедимся, что разрешения на сохранение истории команд установлены
+    echo "export HISTFILE=$HOME/.bash_history" >> ~/.bashrc
+    echo "export HISTSIZE=1000" >> ~/.bashrc
+    echo "export HISTFILESIZE=2000" >> ~/.bashrc
+    echo "export PROMPT_COMMAND='history -a'" >> ~/.bashrc
+    source ~/.bashrc
+    echo -e "\e[1mНастройка сохранения истории команд завершена.\e[0m"
+}
+
+backup_config() {
+    echo -e "\e[1mСоздание резервной копии конфигурации...\e[0m"
+    mkdir -p $CONFIG_DIR
+    tar czf $CONFIG_DIR/termux_config_backup.tar.gz ~/.vimrc ~/.tmux.conf ~/.bashrc # Добавьте другие файлы по необходимости
+    echo -e "\e[1mРезервное копирование завершено.\e[0m"
+}
+
+restore_config() {
+    echo -e "\e[1mВосстановление конфигурации из резервной копии...\e[0m"
+    if [ -e $CONFIG_DIR/termux_config_backup.tar.gz ]; then
+        tar xzf $CONFIG_DIR/termux_config_backup.tar.gz -C ~/
+        echo -e "\e[1mВосстановление завершено.\e[0m"
+    else
+        echo -e "\e[1;31mРезервная копия не найдена.\e[0m"
+    fi
+}
 
 install_packages() {
     echo -e "\e[1mУстановка пакетов...\e[0m"
@@ -20,10 +64,8 @@ install_packages() {
 configure_git() {
     read -p "Введите ваше имя для git: " git_name
     read -p "Введите вашу электронную почту для git: " git_email
-
     git config --global user.name "$git_name"
     git config --global user.email "$git_email"
-
     echo -e "\e[1mНастройка git завершена.\e[0m"
 }
 
@@ -35,7 +77,11 @@ configure_vim() {
     echo -e "\e[1mНастройка Vim завершена.\e[0m"
 }
 
-# Старые опции
+install_configure_wifi_tools() {
+    echo -e "\e[1mУстановка и настройка инструментов Wi-Fi...\e[0m"
+    pkg install -y aircrack-ng
+    echo -e "\e[1mУстановка инструментов Wi-Fi завершена.\e[0m"
+}
 
 install_configure_tmux() {
     echo -e "\e[1mУстановка и настройка tmux...\e[0m"
@@ -43,94 +89,6 @@ install_configure_tmux() {
     cp tmux.conf ~/.tmux.conf
     echo -e "\e[1mНастройка tmux завершена.\e[0m"
 }
-
-configure_python() {
-    echo -e "\e[1mУстановка pip...\e[0m"
-    pkg install -y python
-    curl -sL https://bootstrap.pypa.io/get-pip.py | python
-    echo -e "\e[1mУстановка pip завершена.\e[0m"
-}
-
-configure_nodejs() {
-    echo -e "\e[1mУстановка Node.js...\e[0m"
-    pkg install -y nodejs
-    echo -e "\e[1mУстановка Node.js завершена.\e[0m"
-}
-
-configure_ruby() {
-    echo -e "\e[1mУстановка Ruby...\e[0m"
-    pkg install -y ruby
-    echo -e "\e[1mУстановка Ruby завершена.\e[0m"
-}
-
-configure_golang() {
-    echo -e "\e[1mУстановка Go...\e[0m"
-    pkg install -y golang
-    echo -e "\e[1mУстановка Go завершена.\e[0m"
-}
-
-update_packages() {
-    echo -e "\e[1mОбновление установленных пакетов...\e[0m"
-    pkg update -y && pkg upgrade -y
-    echo -e "\e[1mОбновление завершено.\e[0m"
-}
-
-create_directory() {
-    read -p "Введите имя директории для создания: " dir_name
-    mkdir $dir_name
-    echo -e "\e[1mДиректория '$dir_name' создана.\e[0m"
-}
-
-remove_directory() {
-    read -p "Введите имя директории для удаления: " dir_name
-    rm -rf $dir_name
-    echo -e "\e[1mДиректория '$dir_name' удалена.\e[0m"
-}
-
-cleanup() {
-    echo -e "\e[1;33mОчистка перед выходом...\e[0m"
-    echo -e "\e[1mВыход из скрипта. Удачного использования Termux!\e[0m"
-    exit
-}
-
-# Новые опции
-
-install_configure_vscode() {
-    echo -e "\e[1mУстановка и настройка VSCode...\e[0m"
-    pkg install -y code
-    echo -e "\e[1mУстановка VSCode завершена.\e[0m"
-}
-
-configure_aliases() {
-    echo -e "\e[1mНастройка пользовательских алиасов...\e[0m"
-    echo "alias ll='ls -alF'" >> ~/.bashrc
-    source ~/.bashrc
-    echo -e "\e[1mНастройка алиасов завершена.\e[0m"
-}
-
-install_configure_ssh() {
-    echo -e "\e[1mУстановка и настройка SSH-сервера...\e[0m"
-    if [ ! -e $PREFIX/etc/ssh/sshd_config ]; then
-        pkg install -y openssh
-    fi
-    ssh-keygen -A
-    sshd
-    echo -e "\e[1mНастройка SSH-сервера завершена.\e[0m"
-}
-
-install_configure_ngrok() {
-    echo -e "\e[1mУстановка и настройка ngrok...\e[0m"
-    pkg install -y ngrok
-    echo -e "\e[1mУстановка ngrok завершена.\e[0m"
-}
-
-configure_rsync() {
-    echo -e "\e[1mУстановка и настройка rsync...\e[0m"
-    pkg install -y rsync
-    echo -e "\e[1mУстановка rsync завершена.\e[0m"
-}
-
-# Меню с новыми и старыми опциями
 
 trap cleanup INT TERM
 
@@ -156,10 +114,16 @@ while true; do
     echo "15. Обновить установленные пакеты"
     echo "16. Создать директорию"
     echo "17. Удалить директорию"
+    echo "18. Установить и настроить цвета в Termux"
+    echo "19. Установить и настроить инструменты Wi-Fi"
+    echo "20. Создать резервную копию конфигурации"
+    echo "21. Восстановить конфигурацию из резервной копии"
+    echo "22. Настроить сохранение истории команд в Termux"
+    echo "23. Установка и настройка пакета 'figlet' для создания ASCII-арт текста"
     echo "0. Выход"
     echo -e "\e[1;34m===============================\e[0m"
 
-    read -p "Выберите опцию (0-17): " option
+    read -p "Выберите опцию (0-19): " option
 
     case $option in
         1) install_packages ;;
@@ -179,6 +143,12 @@ while true; do
         15) update_packages ;;
         16) create_directory ;;
         17) remove_directory ;;
+        18) configure_termux_colors ;;
+        19) install_configure_wifi_tools ;;
+        20) backup_config ;;
+        21) restore_config ;;
+        22) configure_command_history ;;
+        23) configure_figlet ;;
         0) cleanup ;;
         *) echo -e "\e[1;31mНеверный ввод. Пожалуйста, введите корректный номер опции.\e[0m" ;;
     esac
