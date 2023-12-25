@@ -2,17 +2,21 @@
 
 SCRIPT_VERSION="1.1"
 DEVELOPER="Termux_Laif"
+REPO_URL="https://github.com/TermuxLate/TermuxConfigurator-"
 
 CONFIG_DIR="$HOME/.termux_config"
 
 PACKAGES="git vim python python2 nodejs curl wget zsh neofetch htop mc openssh fish tmux ruby golang aircrack-ng"
 
-cleanup() {
-    echo -e "\e[1;33mОчистка перед выходом...\e[0m"
-    echo -e "\e[1mВыход из скрипта. Удачного использования Termux!\e[0m"
-    exit
+update_script() {
+    echo -e "\e[1mПроверка обновлений...\e[0m"
+    git pull origin master 
+    if [ $? -eq 0 ]; then
+        echo -e "\e[1mСкрипт успешно обновлен до последней версии.\e[0m"
+    else
+        echo -e "\e[1;31mОшибка при обновлении скрипта.\e[0m"
+    fi
 }
-
 
 install_configure_figlet() {
     echo -e "\e[1mУстановка и настройка figlet...\e[0m"
@@ -32,8 +36,7 @@ configure_figlet() {
 
 configure_command_history() {
     echo -e "\e[1mНастройка сохранения истории команд в Termux...\e[0m"
-    termux-setup-storage # Убедимся, что разрешения на сохранение истории команд установлены
-    echo "export HISTFILE=$HOME/.bash_history" >> ~/.bashrc
+    termux-setup-storage
     echo "export HISTSIZE=1000" >> ~/.bashrc
     echo "export HISTFILESIZE=2000" >> ~/.bashrc
     echo "export PROMPT_COMMAND='history -a'" >> ~/.bashrc
@@ -44,7 +47,8 @@ configure_command_history() {
 backup_config() {
     echo -e "\e[1mСоздание резервной копии конфигурации...\e[0m"
     mkdir -p $CONFIG_DIR
-    tar czf $CONFIG_DIR/termux_config_backup.tar.gz $HOME/.vimrc $HOME/.tmux.conf $HOME/.bashrc # Добавьте другие файлы по необходимости
+    touch ~/.vimrc ~/.tmux.conf ~/.bashrc
+    tar czf $CONFIG_DIR/termux_config_backup.tar.gz ~/.vimrc ~/.tmux.conf ~/.bashrc
     echo -e "\e[1mРезервное копирование завершено.\e[0m"
 }
 
@@ -127,6 +131,7 @@ while true; do
     echo "21. Восстановить конфигурацию из резервной копии"
     echo "22. Настроить сохранение истории команд в Termux"
     echo "23. Установка и настройка пакета 'figlet' для создания ASCII-арт текста"
+    echo "24. Обновить скрипт"
     echo "0. Выход"
     echo -e "\e[1;34m===============================\e[0m"
 
@@ -156,6 +161,7 @@ while true; do
         21) restore_config ;;
         22) configure_command_history ;;
         23) configure_figlet ;;
+        24) update_script ;;
         0) cleanup ;;
         *) echo -e "\e[1;31mНеверный ввод. Пожалуйста, введите корректный номер опции.\e[0m" ;;
     esac
