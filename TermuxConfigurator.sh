@@ -37,7 +37,7 @@ configure_command_history() {
 backup_config() {
     echo -e "\e[1mСоздание резервной копии конфигурации...\e[0m"
     mkdir -p $CONFIG_DIR
-    tar czf $CONFIG_DIR/termux_config_backup.tar.gz ~/.vimrc ~/.tmux.conf ~/.bashrc # Добавьте другие файлы по необходимости
+    tar czf $CONFIG_DIR/termux_config_backup.tar.gz $HOME/.vimrc $HOME/.tmux.conf $HOME/.bashrc # Добавьте другие файлы по необходимости
     echo -e "\e[1mРезервное копирование завершено.\e[0m"
 }
 
