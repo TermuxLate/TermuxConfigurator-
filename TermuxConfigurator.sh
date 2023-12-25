@@ -7,6 +7,13 @@ CONFIG_DIR="$HOME/.termux_config"
 
 PACKAGES="git vim python python2 nodejs curl wget zsh neofetch htop mc openssh fish tmux ruby golang aircrack-ng"
 
+cleanup() {
+    echo -e "\e[1;33mОчистка перед выходом...\e[0m"
+    echo -e "\e[1mВыход из скрипта. Удачного использования Termux!\e[0m"
+    exit
+}
+
+
 install_configure_figlet() {
     echo -e "\e[1mУстановка и настройка figlet...\e[0m"
     pkg install -y figlet
