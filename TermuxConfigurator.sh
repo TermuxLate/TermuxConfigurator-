@@ -2,7 +2,7 @@
 
 SCRIPT_VERSION="1.1"
 DEVELOPER="Termux_Laif"
-REPO_URL="https://github.com/TermuxLate/TermuxConfigurator-"
+REPO_URL="https://github.com/TermuxLate/TermuxConfigurator-.git"
 
 CONFIG_DIR="$HOME/.termux_config"
 
@@ -10,7 +10,8 @@ PACKAGES="git vim python python2 nodejs curl wget zsh neofetch htop mc openssh f
 
 update_script() {
     echo -e "\e[1mПроверка обновлений...\e[0m"
-    git pull origin "$(git rev-parse --abbrev-ref HEAD)" 
+    git pull origin master 
+
     if [ $? -eq 0 ]; then
         echo -e "\e[1mСкрипт успешно обновлен до последней версии.\e[0m"
     else
@@ -21,18 +22,25 @@ update_script() {
 install_configure_figlet() {
     echo -e "\e[1mУстановка и настройка figlet...\e[0m"
     pkg install -y figlet
-    echo -e "\e[1mУстановка figlet завершена.\e[0m"
+
+    if [ $? -eq 0 ]; then
+        echo -e "\e[1mУстановка figlet завершена.\e[0m"
+    else
+        echo -e "\e[1;31mОшибка при установке figlet.\e[0m"
+    fi
 }
 
 configure_figlet() {
     read -p "Хотите настроить figlet? (yes/no): " configure_figlet
+
     if [ "$configure_figlet" == "yes" ]; then
         read -p "Введите стиль для figlet (например, 'block'): " figlet_style
         echo "export FIGLET_FONT=$figlet_style" >> ~/.bashrc
         echo -e "\e[1mНастройка figlet завершена.\e[0m"
+    else
+        echo -e "\e[1mПропущена настройка figlet.\e[0m"
     fi
 }
-
 
 configure_command_history() {
     echo -e "\e[1mНастройка сохранения истории команд в Termux...\e[0m"
@@ -46,29 +54,25 @@ configure_command_history() {
 
 backup_config() {
     echo -e "\e[1mСоздание резервной копии конфигурации...\e[0m"
-    mkdir -p $CONFIG_DIR
+    mkdir -p "$CONFIG_DIR"
     touch ~/.vimrc ~/.tmux.conf ~/.bashrc
-    tar czf $CONFIG_DIR/termux_config_backup.tar.gz ~/.vimrc ~/.tmux.conf ~/.bashrc
-    echo -e "\e[1mРезервное копирование завершено.\e[0m"
+    tar czf "$CONFIG_DIR/termux_config_backup.tar.gz" ~/.vimrc ~/.tmux.conf ~/.bashrc
+
+    if [ $? -eq 0 ]; then
+        echo -e "\e[1mРезервное копирование завершено.\e[0m"
+    else
+        echo -e "\e[1;31mОшибка при создании резервной копии.\e[0m"
+    fi
 }
 
 restore_config() {
     echo -e "\e[1mВосстановление конфигурации из резервной копии...\e[0m"
-    if [ -e $CONFIG_DIR/termux_config_backup.tar.gz ]; then
-        tar xzf $CONFIG_DIR/termux_config_backup.tar.gz -C ~/
+
+    if [ -e "$CONFIG_DIR/termux_config_backup.tar.gz" ]; then
+        tar xzf "$CONFIG_DIR/termux_config_backup.tar.gz" -C ~/
         echo -e "\e[1mВосстановление завершено.\e[0m"
     else
         echo -e "\e[1;31mРезервная копия не найдена.\e[0m"
-    fi
-}
-
-install_packages() {
-    echo -e "\e[1mУстановка пакетов...\e[0m"
-    pkg install -y $PACKAGES
-    if [ $? -eq 0 ]; then
-        echo -e "\e[1mУстановка завершена.\e[0m"
-    else
-        echo -e "\e[1;31mОшибка при установке пакетов.\e[0m"
     fi
 }
 
@@ -85,20 +89,35 @@ configure_vim() {
     git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
     cp vimrc ~/.vimrc
     vim +PluginInstall +qall
-    echo -e "\e[1mНастройка Vim завершена.\e[0m"
+
+    if [ $? -eq 0 ]; then
+        echo -e "\e[1mНастройка Vim завершена.\e[0m"
+    else
+        echo -e "\e[1;31mОшибка при настройке Vim.\e[0m"
+    fi
 }
 
 install_configure_wifi_tools() {
     echo -e "\e[1mУстановка и настройка инструментов Wi-Fi...\e[0m"
     pkg install -y aircrack-ng
-    echo -e "\e[1mУстановка инструментов Wi-Fi завершена.\e[0m"
+
+    if [ $? -eq 0 ]; then
+        echo -e "\e[1mУстановка инструментов Wi-Fi завершена.\e[0m"
+    else
+        echo -e "\e[1;31mОшибка при установке инструментов Wi-Fi.\e[0m"
+    fi
 }
 
 install_configure_tmux() {
     echo -e "\e[1mУстановка и настройка tmux...\e[0m"
     pkg install -y tmux
     cp tmux.conf ~/.tmux.conf
-    echo -e "\e[1mНастройка tmux завершена.\e[0m"
+
+    if [ $? -eq 0 ]; then
+        echo -e "\e[1mНастройка tmux завершена.\e[0m"
+    else
+        echo -e "\e[1;31mОшибка при установке и настройке tmux.\e[0m"
+    fi
 }
 
 trap cleanup INT TERM
